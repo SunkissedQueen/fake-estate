@@ -286,7 +286,6 @@ class App extends Component{
 
 ## Resources/Associations
 - $ rails g resource Space name:string agenda:text time_limit:string image:text user_id:integer
-- $ rails db:migrate
 ```ruby
 # Go to app/models/space.rb
   class Space < ApplicationRecord
@@ -302,6 +301,7 @@ class App extends Component{
     has_many :spaces
   end
 ```
+- $ rails db:migrate
 
 ## Rails Routes
 ```ruby
@@ -314,43 +314,69 @@ class App extends Component{
 
 # Add endpoints to controller
 class GuitarsController < ApplicationController
-# Don't need to setup routes because used resources. Visit '/guitars'
+# Don't need to setup routes because used resources. Visit '/spaces', add an entry
   def index
-    guitars = Guitar.all
-    render json: guitars
+    spaces = Space.all
+    render json: spaces
   end
-# Visit '/guitars/:id'
+# Visit '/guitars/:id', add an entry
   def show
-    guitar = Guitar.find([params[:id]])
-    render json: guitar
+    space = Space.find([params[:id]])
+    render json: space
   end
 # 
   def create
-    guitar = Guitar.create(guitar_params)
-    if guitar.valid?
-      render json: guitar
+    space = Space.create(space_params)
+    if space.valid?
+      render json: space
     else
-      render json: guitar.errors
+      render json: space.errors
     end
   end
-# /guitars/:id
-def destroy
-  guitar = Guitar.find(params[:id])
-  if guitar.destroy
-    render json: guitar
-  else
-    render json: guitar.errors
+# /spaces/:id
+  def update
+    space = Space.find(params[:id])
+    space.update(space_params)
+    if space.valid?
+      render json: space
+    else
+      render json: space.errors
+    end
   end
-end
+# /spaces/:id
+  def destroy
+    space = Space.find(params[:id])
+    if space.destroy
+      render json: space
+    else
+      render json: space.errors
+    end
+  end
 
   private
-  def guitar_params
-    params.require(:guitar).permit(:strings, :manufacturer, :model, :color)
+  def space_params
+    params.require(:space).permit(:name, :agenda, :time_limit, :image)
   end
 end  
 
+# Ensure a user is logged in
 # rails c
-> Guitar.create strings: 7, manufacturer: 'Ibanez', model: 'RG Premium', color: 'Twilight Black'
+> User.all
+> mental = User.find 1
+> mental.spaces.create name: "Rails Room", agenda: "places that I wil
+l gather all my data", time_limit: "5 seconds", image: "https://upload.wikimedia
+.org/wikipedia/commons/3/3f/Rails_and_joints.jpeg"
+
+#Postman entry
+{
+  "space": {
+    "name": "Rails Room", 
+    "agenda": "places that I will gather all my data", 
+    "time_limit": "5 seconds", 
+    "image": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Rails_and_joints.jpeg"
+  }
+}
+# Receiving `need user error code`
 
 # Try endpoints through Postman, Use appropriate HTTP verb, Url from routes, Body--raw, Pretty, JSON, syntax of object, SEND button
 ```
