@@ -38,6 +38,8 @@ end
 - Seeing a blank page? Look for errors in the terminal or inspect your page.
 - Errors? Always look at the first error in the list.
 
+- If received error about `Cannot find component: 'App'. Make sure your component is available to render.` Ensure that App.js is importing React correctly. `import React, { Component } from 'react'`
+
 ### You can copy Devise views (for customization) to your app by running:
 - $ rails g devise:views
 
@@ -172,6 +174,184 @@ import {
   Route,
   Switch
 } from 'react-router-dom'
+
+<Router>
+  <Switch>
+    <Route exact path="/" component={Home} />
+    <Route path="/spaceindex" component={SpaceIndex} />
+    <Route path="/spaceshow" component={SpaceShow} />
+    <Route path="/spacenew" component={SpaceNew} />
+    <Route path="/spaceedit" component={SpaceEdit} />
+    <Route component={NotFound}/>
+  </Switch>
+</Router>
+```
+## React Components/Pages
+```javascript
+// Display
+import React, { Component } from 'react'
+import Counter from './components/Counter'
+class App extends Component {
+  render() {
+    return (
+     <Counter />
+    )
+  }
+}
+
+export default App
+
+// Logic
+import React, { Component } from 'react'
+
+class Counter extends Component{
+  constructor(props){
+    super(props)
+    this.state = {
+      count: 0
+    }
+  }
+
+  handleChange = () => {
+    let newCount = this.state.count + 1
+    this.setState({count: newCount})
+  }
+
+  render(){
+    let {count} = this.state
+
+    return(
+      <>
+        <h2>Counter: {count}</h2>
+        <button onClick = {this.handleChange}>
+          Press Me!
+        </button>
+      </>
+    )
+  }
+}
+
+export default Counter
+```
+
+## Scaffolding
+```javascript
+// create a file called mockSpaces.js that will live in the javascript directory and hold an array of space objects.
+
+let spaces = [
+  {
+    id: 1,
+    name: "HaHa Hut",
+    agenda: "mental break space, need to laugh",
+    time_limit: "15 minutes",
+    image: "https://openclipart.org/download/253835/LOL_Laughing_Out_Loud.svg"
+  },
+  {
+    id: 2,
+    name: "Collaborative Cove",
+    agenda: "help with blockers, insecure in ability to work alone, rubber duck",
+    time_limit: "45 minutes",
+    image: "https://freesvg.org/img/Team-Typography.png"
+  },
+  {
+    id: 3,
+    name: "Solo Stand",
+    agenda: "quiet space to work, unavailable to communicate",
+    time_limit: "45 minutes",
+    image: "https://www.publicdomainpictures.net/pictures/380000/nahled/alone-reading.jpg"
+  },
+  {
+    id: 4,
+    name: "Paper Palace",
+    agenda: "places for employers and potential employees to connect",
+    time_limit: "45 minutes",
+    image: "https://www.publicdomainpictures.net/pictures/390000/nahled/job-offer.jpg"
+  }
+]
+export default spaces
+
+
+// Set mock data into state and passed around our application through src/App.js
+
+import mockSpaces from './mockSpaces.js'
+
+class App extends Component{
+  constructor(props){
+    super(props)
+    this.state = {
+      spaces: mockSpaces
+    }
+  }
 ```
 
 ## Resources/Associations
+- $ rails g resource Space name:string agenda:text time_limit:string image:text user_id:integer
+- $ rails db:migrate
+```ruby
+# Go to app/models/space.rb
+  class Space < ApplicationRecord
+    belongs_to :user
+  end
+  
+# Go to app/models/user.rb
+  class User < ApplicationRecord
+    # Include default devise modules. Others available are:
+    # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+    devise :database_authenticatable, :registerable,
+          :recoverable, :rememberable, :validatable
+    has_many :spaces
+  end
+```
+
+## Rails Routes
+```ruby
+# Disable Authenticity Token in app/controllers/application_controller.rb
+  skip_before_action :verify_authenticity_token
+
+# Access rails routes
+# $ rails routes -E
+# http://localhost:3000/rails/info/routes
+
+# Add endpoints to controller
+class GuitarsController < ApplicationController
+# Don't need to setup routes because used resources. Visit '/guitars'
+  def index
+    guitars = Guitar.all
+    render json: guitars
+  end
+# Visit '/guitars/:id'
+  def show
+    guitar = Guitar.find([params[:id]])
+    render json: guitar
+  end
+# 
+  def create
+    guitar = Guitar.create(guitar_params)
+    if guitar.valid?
+      render json: guitar
+    else
+      render json: guitar.errors
+    end
+  end
+# /guitars/:id
+def destroy
+  guitar = Guitar.find(params[:id])
+  if guitar.destroy
+    render json: guitar
+  else
+    render json: guitar.errors
+  end
+end
+
+  private
+  def guitar_params
+    params.require(:guitar).permit(:strings, :manufacturer, :model, :color)
+  end
+end  
+
+# rails c
+> Guitar.create strings: 7, manufacturer: 'Ibanez', model: 'RG Premium', color: 'Twilight Black'
+
+# Try endpoints through Postman, Use appropriate HTTP verb, Url from routes, Body--raw, Pretty, JSON, syntax of object, SEND button
+```
+
