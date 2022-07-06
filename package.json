@@ -8,6 +8,7 @@
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "5.3.3",
     "react_ujs": "^2.6.2",
     "reactstrap": "^9.1.1",
     "webpack": "^4.46.0",
